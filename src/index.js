@@ -2,7 +2,7 @@ import './css/styles.css';
 import debounce from "lodash.debounce";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 const DEBOUNCE_DELAY = 300;
-
+// import {fetchCountries} from "./fetchCountries";
 const refs = {
     inputEl: document.querySelector('#search-box'),
     countryListEl: document.querySelector('.country-list'),
@@ -11,28 +11,25 @@ const refs = {
 
 
 const {inputEl, countryListEl, counrtyInfoEl} = refs;
-
 function fetchCountries(name){
  fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,capital,population,flags,languages`)
 .then(response => {
+  if (!response.ok) {
+    throw new Error();
+}
   return response.json();
+  
 })
 .then(counrties => {
-    if (counrties.length === 1) {
-      countryListEl.insertAdjacentHTML('beforeend', renderCountriesList(counrties));
-      counrtyInfoEl.insertAdjacentHTML('beforeend', renderCountriesInfo(counrties));
-    } else if (counrties.length > 10) {
-      Notify.info("Too many matches found. Please enter a more specific name.")
-    }else if (counrties.length >= 2 && counrties.length <= 10) {
-      countryListEl.insertAdjacentHTML('beforeend', renderCountriesList(counrties));
-    }
-    clearInput();
-})
-.catch(() =>  {
   clearInput();
+  inputChecking(counrties)
+})
+.catch(() => {
   Notify.failure("Oops, there is no country with that name");
+  clearInput();
 })
 }
+
 inputEl.addEventListener('input', debounce(onSearchCountry, DEBOUNCE_DELAY));
 
 function onSearchCountry(){
@@ -58,9 +55,20 @@ return `<ul class='country-list-info'>
   }).join('')
 }
 
+function inputChecking(counrties){
+  if (counrties.length === 1) {
+    countryListEl.insertAdjacentHTML('beforeend', renderCountriesList(counrties));
+    counrtyInfoEl.insertAdjacentHTML('beforeend', renderCountriesInfo(counrties));
+  } else if (counrties.length > 10) {
+    Notify.info("Too many matches found. Please enter a more specific name.")
+  }else if (counrties.length >= 2 && counrties.length <= 10) {
+    countryListEl.insertAdjacentHTML('beforeend', renderCountriesList(counrties));
+  }
+}
+
 function clearInput(){
-  if (inputEl.value === '') {
     countryListEl.innerHTML = '';
     counrtyInfoEl.innerHTML = '';
   }
-}
+
+  
