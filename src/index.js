@@ -1,8 +1,8 @@
 import './css/styles.css';
 import debounce from "lodash.debounce";
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import {fetchCountries} from "./function/fetchCountries";
 const DEBOUNCE_DELAY = 300;
-// import {fetchCountries} from "./fetchCountries";
+
 const refs = {
     inputEl: document.querySelector('#search-box'),
     countryListEl: document.querySelector('.country-list'),
@@ -11,29 +11,14 @@ const refs = {
 
 
 const {inputEl, countryListEl, counrtyInfoEl} = refs;
-function fetchCountries(name){
- fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,capital,population,flags,languages`)
-.then(response => {
-  if (!response.ok) {
-    throw new Error();
-}
-  return response.json();
-  
-})
-.then(counrties => {
-  clearInput();
-  inputChecking(counrties)
-})
-.catch(() => {
-  Notify.failure("Oops, there is no country with that name");
-  clearInput();
-})
-}
+
 
 inputEl.addEventListener('input', debounce(onSearchCountry, DEBOUNCE_DELAY));
 
 function onSearchCountry(){
   const name = inputEl.value.trim();
+  if(!name.trim()){
+    return}
   fetchCountries(name);
 }
 
